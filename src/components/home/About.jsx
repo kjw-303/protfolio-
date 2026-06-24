@@ -1,21 +1,21 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProjects } from '../../data/projects.js';
+import { getProjects, fetchProjects } from '../../data/projects.js';
 
-const ALL_PROJECTS = getProjects();
-// Selected Works 슬라이더: 처음 6개
-const CARDS = ALL_PROJECTS.slice(0, 6).map(p => ({
-  href: `/projects/${p.id}`,
-  img: p.thumb,
-  title: p.title,
-  desc: p.sub,
-}));
+function toCards(list) {
+  return list.slice(0, 6).map(p => ({ href: `/projects/${p.id}`, img: p.thumb, title: p.title, desc: p.sub }));
+}
 
 export default function About() {
+  const [cards, setCards] = useState(() => toCards(getProjects()));
   const trackRef = useRef(null);
   const slideOffsetRef = useRef(0);
   const isResetRef = useRef(false);
   const autoTimerRef = useRef(null);
+
+  useEffect(() => {
+    fetchProjects().then(list => setCards(toCards(list)));
+  }, []);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -157,7 +157,7 @@ export default function About() {
         </div>
         <div className="projects-viewport">
           <div className="projects-track" ref={trackRef}>
-            {CARDS.map((card, i) => (
+            {cards.map((card, i) => (
               <Link key={i} to={card.href} className="proj-card" data-hover>
                 <div className="proj-thumb">
                   <div className="proj-ph">

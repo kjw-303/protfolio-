@@ -1,4 +1,7 @@
+import { supabase } from '../lib/supabase.js';
+
 const STORAGE_KEY = 'portfolio_projects';
+const DB_ROW_ID   = 1;
 
 export const DEFAULT_PROJECTS = [
   {
@@ -183,6 +186,7 @@ export const DEFAULT_PROJECTS = [
   },
 ];
 
+// 동기 (초기 렌더용 — localStorage 캐시 또는 DEFAULT)
 export function getProjects() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -191,10 +195,33 @@ export function getProjects() {
   return DEFAULT_PROJECTS;
 }
 
-export function saveProjects(projects) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+// 비동기 — Supabase에서 최신 데이터 로드
+export async function fetchProjects() {
+  try {
+    const { data, error } = await supabase
+      .from('portfolio_projects')
+      .select('projects')
+      .eq('id', DB_ROW_ID)
+      .single();
+    if (error || !data) throw error;
+    const list = data.projects;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    return list;
+  } catch (e) {
+    return getProjects(); // fallback
+  }
 }
 
-export function getProjectById(id) {
-  return getProjects().find(p => p.id === Number(id)) || DEFAULT_PROJECTS[0];
+// 비동기 — Supabase에 저장
+export async function saveProjects(projects) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  const { error } = await supabase
+    .from('portfolio_projects')
+    .upsert({ id: DB_ROW_ID, projects });
+  if (error) console.error('Supabase save error:', error);
+}
+
+export async function getProjectById(id) {
+  const list = await fetchProjects();
+  return list.find(p => p.id === Number(id)) || DEFAULT_PROJECTS[0];
 }

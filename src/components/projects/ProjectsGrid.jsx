@@ -1,11 +1,18 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProjects } from '../../data/projects.js';
+import { getProjects, fetchProjects } from '../../data/projects.js';
 
-const PROJECTS = getProjects().map(p => ({ id: p.id, img: p.thumb, title: p.title, sub: p.sub, link: p.link || '' }));
+function toList(raw) {
+  return raw.map(p => ({ id: p.id, img: p.thumb, title: p.title, sub: p.sub, link: p.link || '' }));
+}
 
 export default function ProjectsGrid() {
+  const [projects, setProjects] = useState(() => toList(getProjects()));
   const gridRef = useRef(null);
+
+  useEffect(() => {
+    fetchProjects().then(list => setProjects(toList(list)));
+  }, []);
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -66,7 +73,7 @@ export default function ProjectsGrid() {
     <div className="block-projects-wrap">
       <div className="block-group__inner-container">
         <div className="block-projects__grid" ref={gridRef}>
-          {PROJECTS.map(p => (
+          {projects.map(p => (
             <Link key={p.id} to={`/projects/${p.id}`} className="block-projects__item" data-hover>
               <div className="block-projects__media">
                 <img

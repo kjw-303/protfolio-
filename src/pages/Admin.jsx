@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProjects, saveProjects, DEFAULT_PROJECTS } from '../data/projects.js';
+import { getProjects, fetchProjects, saveProjects, DEFAULT_PROJECTS } from '../data/projects.js';
 
 /* ── 기본 커서 복원 ── */
 function useAdminCursor() {
@@ -226,33 +226,38 @@ export default function Admin() {
   const [selectedId, setSelectedId] = useState(null);
   const [savedMsg, setSavedMsg] = useState('');
 
+  useEffect(() => {
+    fetchProjects().then(setProjects);
+  }, []);
+
   const selected = projects.find(p => p.id === selectedId);
 
   function updateField(field, value) {
     setProjects(prev => prev.map(p => p.id === selectedId ? { ...p, [field]: value } : p));
   }
 
-  function handleSave() {
-    saveProjects(projects);
+  async function handleSave() {
+    setSavedMsg('저장 중...');
+    await saveProjects(projects);
     setSavedMsg('저장 완료!');
     setTimeout(() => setSavedMsg(''), 2500);
   }
 
-  function handleReset() {
+  async function handleReset() {
     if (!confirm('전체 데이터를 초기값으로 되돌릴까요?')) return;
     setProjects(DEFAULT_PROJECTS);
-    saveProjects(DEFAULT_PROJECTS);
+    await saveProjects(DEFAULT_PROJECTS);
     setSelectedId(null);
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     if (!confirm('이 프로젝트를 삭제할까요?')) return;
     const updated = projects.filter(p => p.id !== id);
     setProjects(updated);
-    saveProjects(updated);
+    await saveProjects(updated);
   }
 
-  function handleAdd() {
+  async function handleAdd() {
     const newId = Math.max(...projects.map(p => p.id)) + 1;
     const newProject = {
       id: newId,
@@ -272,7 +277,7 @@ export default function Admin() {
     };
     const updated = [...projects, newProject];
     setProjects(updated);
-    saveProjects(updated);
+    await saveProjects(updated);
     setSelectedId(newId);
   }
 
