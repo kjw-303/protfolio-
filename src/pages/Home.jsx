@@ -7,6 +7,7 @@ import About from '../components/home/About.jsx';
 import Industries from '../components/home/Industries.jsx';
 import CTA from '../components/home/CTA.jsx';
 import useScrollReveal from '../hooks/useScrollReveal.js';
+import ScrollLine from '../components/home/ScrollLine.jsx';
 
 function Footer() {
   return (
@@ -59,6 +60,7 @@ export default function Home() {
   return (
     <>
       <Cursor />
+      <ScrollLine />
       <Header />
       <Hero />
       <Services />
