@@ -223,38 +223,31 @@ function EditView({ project, onChange, onSave, savedMsg }) {
 export default function Admin() {
   useAdminCursor();
   const [projects, setProjects] = useState(() => getProjects());
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState(-1);
   const [savedMsg, setSavedMsg] = useState('');
 
   useEffect(() => {
     fetchProjects().then(setProjects);
   }, []);
 
-  const selected = projects.find(p => p.id === selectedId);
+  const selected = selectedId !== -1 ? projects.find(p => p.id === selectedId) : undefined;
 
   function updateField(field, value) {
     setProjects(prev => prev.map(p => p.id === selectedId ? { ...p, [field]: value } : p));
   }
 
-  async function handleSave() {
-    setSavedMsg('저장 중...');
-    try {
-      await saveProjects(projects);
-    } catch (e) {
-      console.error(e);
-    }
-    setSavedMsg('저장 완료!');
-    setTimeout(() => {
-      setSavedMsg('');
-      setSelectedId(null);
-    }, 800);
+  function handleSave() {
+    const clean = projects.filter(p => p.id !== null && p.id !== undefined && p.id > 0);
+    saveProjects(clean).catch(console.error);
+    setProjects(clean);
+    setSelectedId(-1);
   }
 
   async function handleReset() {
     if (!confirm('전체 데이터를 초기값으로 되돌릴까요?')) return;
     setProjects(DEFAULT_PROJECTS);
     await saveProjects(DEFAULT_PROJECTS);
-    setSelectedId(null);
+    setSelectedId(-1);
   }
 
   async function handleDelete(id) {
@@ -265,7 +258,8 @@ export default function Admin() {
   }
 
   async function handleAdd() {
-    const newId = Math.max(...projects.map(p => p.id)) + 1;
+    const validIds = projects.map(p => p.id).filter(id => typeof id === 'number' && id > 0);
+    const newId = validIds.length > 0 ? Math.max(...validIds) + 1 : 1;
     const newProject = {
       id: newId,
       thumb: '',
@@ -299,7 +293,7 @@ export default function Admin() {
               <span style={{ color: '#444' }}>›</span>
               <button
                 style={{ background: 'none', border: 'none', color: '#888', fontSize: 13, padding: 0, cursor: 'pointer' }}
-                onClick={() => setSelectedId(null)}
+                onClick={() => setSelectedId(-1)}
               >
                 Projects
               </button>
@@ -309,7 +303,7 @@ export default function Admin() {
           )}
         </div>
         <div style={s.headerLinks}>
-          <button onClick={() => setSelectedId(null)} style={s.btn('transparent', '#888', '1px solid #333')}>← 홈</button>
+          <button onClick={() => setSelectedId(-1)} style={s.btn('transparent', '#888', '1px solid #333')}>← 홈</button>
           <Link to="/projects" style={s.btn('transparent', '#888', '1px solid #333')}>Projects</Link>
         </div>
       </header>

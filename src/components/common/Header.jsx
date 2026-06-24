@@ -85,9 +85,6 @@ export default function Header() {
               <Link to="/projects" onClick={closeNav}>Projects</Link>
             </li>
             <li className="nav-drawer-item">
-              <Link to="/#services" onClick={closeNav}>Services</Link>
-            </li>
-            <li className="nav-drawer-item">
               <Link to="/#contact" onClick={closeNav}>Contact</Link>
             </li>
           </ul>
@@ -112,7 +109,6 @@ export default function Header() {
           <Link to="/projects" className={`nav-link${isProjects ? ' is-active' : ''}`} data-hover>
             Projects
           </Link>
-          <Link to="/#services" className="nav-link" data-hover>Services</Link>
           <Link to="/#contact" className="nav-link" data-hover>Contact</Link>
         </nav>
         <button

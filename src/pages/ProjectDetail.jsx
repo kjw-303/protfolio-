@@ -14,10 +14,10 @@ function toSnapSliderProps(p) {
     link: p.link || '',
     screenImg: p.screenImg || p.thumb,
     specs: [
-      { label: 'CATEGORY', value: p.category || '' },
+      { label: 'CATEGORY', value: (p.category || '').replace(/\n/g, '<br>') },
       { label: 'STACK', value: (p.stack || '').replace(/\n/g, '<br>') },
       { label: 'FOCUS', value: (p.focus || '').replace(/\n/g, '<br>') },
-      { label: 'YEAR', value: p.year || '' },
+      { label: 'YEAR', value: (p.year || '').replace(/\n/g, '<br>') },
     ],
     desc: [p.desc1, p.desc2].filter(Boolean),
     gallery: p.gallery || [],

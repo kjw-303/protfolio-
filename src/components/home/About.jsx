@@ -137,11 +137,11 @@ export default function About() {
           <div className="about-links">
             <div className="about-link" data-reveal data-delay="2">
               <p>컴포넌트 기반 설계와 체계화된 CSS로 장기적으로 유지보수가 쉬운 결과물을 제공합니다.</p>
-              <a href="#services" data-hover>Web Publishing</a>
+              <span className="about-link-label" data-hover>Web Publishing</span>
             </div>
             <div className="about-link" data-reveal data-delay="3">
               <p>지속적인 협업을 중요하게 생각합니다. 명확한 커뮤니케이션과 일관된 프로세스를 유지합니다.</p>
-              <a href="#contact" data-hover>협업 &amp; 유지보수</a>
+              <span className="about-link-label" data-hover>협업 &amp; 유지보수</span>
             </div>
           </div>
         </div>

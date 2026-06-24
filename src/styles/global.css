@@ -121,10 +121,10 @@ nav { display:flex; gap:3rem; align-items:center; }
 .about-link { padding:1.5rem 0; border-top:1px solid #1e1e1e; transition:border-color .2s; }
 .about-link:hover { border-color:#333; }
 .about-link p { font-size:14px; color:#fff; line-height:1.7; margin-bottom:.7rem; }
-.about-link a { font-size:16px; font-weight:700; color:#fff; display:inline-flex; align-items:center; gap:.4rem; transition:color .2s; }
-.about-link a::after { content:'→'; transition:transform .2s; }
-.about-link:hover a { color:var(--accent); }
-.about-link:hover a::after { transform:translateX(4px); }
+.about-link a, .about-link-label { font-size:16px; font-weight:700; color:#fff; display:inline-flex; align-items:center; gap:.4rem; transition:color .2s; }
+.about-link a::after, .about-link-label::after { content:'→'; transition:transform .2s; }
+.about-link:hover a, .about-link:hover .about-link-label { color:var(--accent); }
+.about-link:hover a::after, .about-link:hover .about-link-label::after { transform:translateX(4px); }
 
 /* ═══ PROJECTS ═══ */
 .projects-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2rem; }
@@ -243,7 +243,7 @@ footer { background:var(--black); color:#fff; padding:clamp(3rem,5vw,5rem) var(-
   .about-desc { font-size:15px; margin-bottom:2rem; }
   .about-links { grid-template-columns:1fr; gap:0; }
   .about-link p { font-size:13px; }
-  .about-link a { font-size:14px; }
+  .about-link a, .about-link-label { font-size:14px; }
   .projects-header { margin-bottom:1.5rem; }
   .section-title { font-size:36px; }
   .projects-viewport { overflow:hidden; }
