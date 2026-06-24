@@ -302,7 +302,7 @@ export default function Admin() {
           )}
         </div>
         <div style={s.headerLinks}>
-          <Link to="/" style={s.btn('transparent', '#888', '1px solid #333')}>← 홈</Link>
+          <button onClick={() => setSelectedId(null)} style={s.btn('transparent', '#888', '1px solid #333')}>← 홈</button>
           <Link to="/projects" style={s.btn('transparent', '#888', '1px solid #333')}>Projects</Link>
         </div>
       </header>
