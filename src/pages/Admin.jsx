@@ -240,7 +240,7 @@ export default function Admin() {
     setSavedMsg('저장 중...');
     await saveProjects(projects);
     setSavedMsg('저장 완료!');
-    setTimeout(() => setSavedMsg(''), 2500);
+    setTimeout(() => { setSavedMsg(''); setSelectedId(null); }, 1000);
   }
 
   async function handleReset() {
