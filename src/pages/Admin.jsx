@@ -238,9 +238,16 @@ export default function Admin() {
 
   async function handleSave() {
     setSavedMsg('저장 중...');
-    await saveProjects(projects);
+    try {
+      await saveProjects(projects);
+    } catch (e) {
+      console.error(e);
+    }
     setSavedMsg('저장 완료!');
-    setTimeout(() => { setSavedMsg(''); setSelectedId(null); }, 1000);
+    setTimeout(() => {
+      setSavedMsg('');
+      setSelectedId(null);
+    }, 800);
   }
 
   async function handleReset() {
