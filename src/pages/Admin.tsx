@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProjects, fetchProjects, saveProjects, DEFAULT_PROJECTS } from '../data/projects.js';
+import { getProjectsFromCache, fetchProjects, saveProjects } from '../services/projectService';
+import { DEFAULT_PROJECTS } from '../data/defaultProjects';
+import type { Project } from '../types/project';
 
-/* ── 기본 커서 복원 ── */
 function useAdminCursor() {
   useEffect(() => {
     const style = document.createElement('style');
@@ -13,7 +14,6 @@ function useAdminCursor() {
   }, []);
 }
 
-/* ── 공통 스타일 ── */
 const c = {
   accent: '#00e5ff',
   black: '#111',
@@ -24,67 +24,61 @@ const c = {
   danger: '#e53935',
 };
 
+type CSSObj = Record<string, string | number>;
+
 const s = {
-  page: { minHeight: '100vh', background: c.bg, fontFamily: "'Pretendard Variable', sans-serif", color: c.black },
-
-  /* 헤더 */
-  header: { background: c.black, color: '#fff', padding: '0 40px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 },
-  headerLeft: { display: 'flex', alignItems: 'center', gap: 24 },
-  headerTitle: { fontSize: 15, fontWeight: 700, margin: 0 },
-  headerBreadcrumb: { fontSize: 13, color: '#666', display: 'flex', alignItems: 'center', gap: 8 },
-  headerLinks: { display: 'flex', gap: 12 },
-
-  /* 버튼 */
-  btn: (bg, color, border) => ({
-    padding: '8px 18px', background: bg, color, border: border || 'none',
+  page: { minHeight: '100vh', background: c.bg, fontFamily: "'Pretendard Variable', sans-serif", color: c.black } as CSSObj,
+  header: { background: c.black, color: '#fff', padding: '0 40px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 } as CSSObj,
+  headerLeft: { display: 'flex', alignItems: 'center', gap: 24 } as CSSObj,
+  headerTitle: { fontSize: 15, fontWeight: 700, margin: 0 } as CSSObj,
+  headerBreadcrumb: { fontSize: 13, color: '#666', display: 'flex', alignItems: 'center', gap: 8 } as CSSObj,
+  headerLinks: { display: 'flex', gap: 12 } as CSSObj,
+  btn: (bg: string, color: string, border?: string): CSSObj => ({
+    padding: '8px 18px', background: bg, color, border: border ?? 'none',
     borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer',
     letterSpacing: '.05em', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6,
   }),
-  btnSave: { padding: '8px 22px', background: c.accent, color: '#000', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' },
-
-  /* 리스트 뷰 */
-  listWrap: { padding: '36px 40px' },
-  listTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 },
-  listTitle: { fontSize: 22, fontWeight: 700, margin: 0 },
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 },
-  card: (hover) => ({
+  btnSave: { padding: '8px 22px', background: c.accent, color: '#000', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' } as CSSObj,
+  listWrap: { padding: '36px 40px' } as CSSObj,
+  listTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 } as CSSObj,
+  listTitle: { fontSize: 22, fontWeight: 700, margin: 0 } as CSSObj,
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 } as CSSObj,
+  card: (hover: boolean): CSSObj => ({
     background: c.cardBg, borderRadius: 10, overflow: 'hidden', cursor: 'pointer',
     border: `1.5px solid ${hover ? c.accent : c.border}`,
     transition: 'border-color .15s, box-shadow .15s',
     boxShadow: hover ? '0 4px 16px rgba(0,229,255,.12)' : '0 1px 3px rgba(0,0,0,.06)',
   }),
-  cardThumb: { width: '100%', height: 130, objectFit: 'cover', display: 'block', background: '#eee' },
-  cardThumbPh: { width: '100%', height: 130, background: '#e8e8e8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 },
-  cardBody: { padding: '12px 14px 14px' },
-  cardNum: { fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: c.muted, marginBottom: 4 },
-  cardTitle: { fontSize: 13, fontWeight: 700, lineHeight: 1.35, marginBottom: 4 },
-  cardSub: { fontSize: 11, color: '#888', lineHeight: 1.4 },
-
-  /* 편집 뷰 */
-  editWrap: { padding: '32px 40px', maxWidth: 900, margin: '0 auto' },
-  editTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 },
-  editTitle: { fontSize: 20, fontWeight: 700, margin: 0 },
-  editBtns: { display: 'flex', alignItems: 'center', gap: 10 },
-  saved: { fontSize: 12, color: '#00c853', fontWeight: 700 },
-
-  section: { background: c.cardBg, borderRadius: 10, padding: '24px 28px', marginBottom: 16, border: `1px solid ${c.border}` },
-  sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: c.muted, marginBottom: 18 },
-
-  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px' },
-  grid4: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px 16px' },
-  grid3: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 },
-
-  field: { display: 'flex', flexDirection: 'column', gap: 6 },
-  label: { fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#888' },
-  input: { padding: '8px 11px', border: `1.5px solid ${c.border}`, borderRadius: 6, fontSize: 13, outline: 'none', fontFamily: 'inherit', cursor: 'text' },
-  textarea: { padding: '8px 11px', border: `1.5px solid ${c.border}`, borderRadius: 6, fontSize: 13, outline: 'none', fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.6, cursor: 'text' },
-  preview: (h) => ({ width: '100%', height: h || 120, objectFit: 'cover', borderRadius: 6, background: '#f0f0f0', marginTop: 8, display: 'block' }),
+  cardThumb: { width: '100%', height: 130, objectFit: 'cover', display: 'block', background: '#eee' } as CSSObj,
+  cardThumbPh: { width: '100%', height: 130, background: '#e8e8e8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 } as CSSObj,
+  cardBody: { padding: '12px 14px 14px' } as CSSObj,
+  cardNum: { fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: c.muted, marginBottom: 4 } as CSSObj,
+  cardTitle: { fontSize: 13, fontWeight: 700, lineHeight: 1.35, marginBottom: 4 } as CSSObj,
+  cardSub: { fontSize: 11, color: '#888', lineHeight: 1.4 } as CSSObj,
+  editWrap: { padding: '32px 40px', maxWidth: 900, margin: '0 auto' } as CSSObj,
+  editTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 } as CSSObj,
+  editTitle: { fontSize: 20, fontWeight: 700, margin: 0 } as CSSObj,
+  editBtns: { display: 'flex', alignItems: 'center', gap: 10 } as CSSObj,
+  saved: { fontSize: 12, color: '#00c853', fontWeight: 700 } as CSSObj,
+  section: { background: c.cardBg, borderRadius: 10, padding: '24px 28px', marginBottom: 16, border: `1px solid ${c.border}` } as CSSObj,
+  sectionTitle: { fontSize: 10, fontWeight: 700, letterSpacing: '.15em', textTransform: 'uppercase', color: c.muted, marginBottom: 18 } as CSSObj,
+  grid2: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px' } as CSSObj,
+  grid4: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '14px 16px' } as CSSObj,
+  grid3: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 } as CSSObj,
+  field: { display: 'flex', flexDirection: 'column', gap: 6 } as CSSObj,
+  label: { fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#888' } as CSSObj,
+  input: { padding: '8px 11px', border: `1.5px solid ${c.border}`, borderRadius: 6, fontSize: 13, outline: 'none', fontFamily: 'inherit', cursor: 'text' } as CSSObj,
+  textarea: { padding: '8px 11px', border: `1.5px solid ${c.border}`, borderRadius: 6, fontSize: 13, outline: 'none', fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.6, cursor: 'text' } as CSSObj,
+  preview: (h?: number): CSSObj => ({ width: '100%', height: h ?? 120, objectFit: 'cover', borderRadius: 6, background: '#f0f0f0', marginTop: 8, display: 'block' }),
 };
 
-/* ════════════════════════════
-   LIST VIEW
-════════════════════════════ */
-function ProjectCard({ project, onClick, onDelete }) {
+interface ProjectCardProps {
+  project: Project;
+  onClick: () => void;
+  onDelete: () => void;
+}
+
+function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
   const [hover, setHover] = useState(false);
   return (
     <div
@@ -94,8 +88,8 @@ function ProjectCard({ project, onClick, onDelete }) {
     >
       <div style={{ position: 'relative', cursor: 'pointer' }} onClick={onClick}>
         {project.thumb
-          ? <img src={project.thumb} alt="" style={s.cardThumb} onError={e => { e.target.style.display='none'; }} />
-          : <div style={s.cardThumbPh}>🏢</div>
+          ? <img src={project.thumb} alt="" style={s.cardThumb} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          : <div style={s.cardThumbPh}>🖼</div>
         }
         <button
           style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,.65)', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 8px', fontSize: 11, fontWeight: 700, cursor: 'pointer', zIndex: 10 }}
@@ -113,7 +107,15 @@ function ProjectCard({ project, onClick, onDelete }) {
   );
 }
 
-function ListView({ projects, onSelect, onReset, onAdd, onDelete }) {
+interface ListViewProps {
+  projects: Project[];
+  onSelect: (id: number) => void;
+  onReset: () => void;
+  onAdd: () => void;
+  onDelete: (id: number) => void;
+}
+
+function ListView({ projects, onSelect, onAdd, onDelete }: ListViewProps) {
   return (
     <div style={s.listWrap}>
       <div style={s.listTop}>
@@ -129,54 +131,56 @@ function ListView({ projects, onSelect, onReset, onAdd, onDelete }) {
   );
 }
 
-/* ════════════════════════════
-   EDIT VIEW
-════════════════════════════ */
-function EditView({ project, onChange, onSave, savedMsg }) {
-  const gallery = project.gallery || ['', '', ''];
+interface EditViewProps {
+  project: Project;
+  onChange: (field: keyof Project, value: string | string[]) => void;
+  onSave: () => void;
+  savedMsg: string;
+}
 
-  function f(field) {
-    return <input style={s.input} value={project[field] || ''} onChange={e => onChange(field, e.target.value)} />;
+function EditView({ project, onChange, onSave, savedMsg }: EditViewProps) {
+  const gallery = project.gallery ?? ['', '', ''];
+
+  function f(field: keyof Project) {
+    return <input style={s.input} value={String(project[field] ?? '')} onChange={e => onChange(field, e.target.value)} />;
   }
-  function ta(field, rows) {
-    return <textarea style={{ ...s.textarea, minHeight: rows * 28 }} value={project[field] || ''} onChange={e => onChange(field, e.target.value)} rows={rows} />;
+  function ta(field: keyof Project, rows: number) {
+    return <textarea style={{ ...s.textarea, minHeight: rows * 28 }} value={String(project[field] ?? '')} onChange={e => onChange(field, e.target.value)} rows={rows} />;
   }
 
   return (
     <div style={s.editWrap}>
       <div style={s.editTop}>
-        <h2 style={s.editTitle}>#{String(project.id).padStart(2,'0')} {project.title}</h2>
+        <h2 style={s.editTitle}>#{String(project.id).padStart(2, '0')} {project.title}</h2>
         <div style={s.editBtns}>
           {savedMsg && <span style={s.saved}>{savedMsg}</span>}
           <button style={s.btnSave} onClick={onSave}>저장하기</button>
         </div>
       </div>
 
-      {/* 카드 공통 */}
       <div style={s.section}>
-        <p style={s.sectionTitle}>카드 — 슬라이더 &amp; 목록 공통</p>
+        <p style={s.sectionTitle}>썸네일 이미지 & 기본 정보</p>
         <div style={s.grid2}>
           <div style={s.field}>
             <label style={s.label}>썸네일 이미지 URL</label>
             {f('thumb')}
-            {project.thumb && <img src={project.thumb} alt="" style={s.preview(140)} onError={e => { e.target.style.display='none'; }} />}
+            {project.thumb && <img src={project.thumb} alt="" style={s.preview(140)} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={s.field}><label style={s.label}>카드 타이틀</label>{f('title')}</div>
-            <div style={s.field}><label style={s.label}>카드 서브텍스트</label>{f('sub')}</div>
+            <div style={s.field}><label style={s.label}>제목</label>{f('title')}</div>
+            <div style={s.field}><label style={s.label}>부제목</label>{f('sub')}</div>
             <div style={s.field}>
-              <label style={s.label}>링크 URL <span style={{ fontWeight:400, textTransform:'none', letterSpacing:0, color:'#bbb', fontSize:10 }}>(비워두면 상세 페이지로 이동)</span></label>
+              <label style={s.label}>링크 URL <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: '#bbb', fontSize: 10 }}>(있으면 외부 사이트로 이동)</span></label>
               {f('link')}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 스펙 */}
       <div style={s.section}>
         <p style={s.sectionTitle}>스펙</p>
         <div style={s.grid4}>
-          {['category', 'stack', 'focus', 'year'].map(k => (
+          {(['category', 'stack', 'focus', 'year'] as const).map(k => (
             <div key={k} style={s.field}>
               <label style={s.label}>{k.toUpperCase()}</label>
               {ta(k, k === 'year' ? 1 : 2)}
@@ -185,7 +189,6 @@ function EditView({ project, onChange, onSave, savedMsg }) {
         </div>
       </div>
 
-      {/* 설명 */}
       <div style={s.section}>
         <p style={s.sectionTitle}>프로젝트 설명</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -194,17 +197,16 @@ function EditView({ project, onChange, onSave, savedMsg }) {
         </div>
       </div>
 
-      {/* 갤러리 */}
       <div style={s.section}>
         <p style={s.sectionTitle}>갤러리 (3장)</p>
         <div style={s.grid3}>
-          {[0,1,2].map(i => (
+          {[0, 1, 2].map(i => (
             <div key={i} style={s.field}>
-              <label style={s.label}>이미지 {i+1}</label>
-              <input style={s.input} value={gallery[i] || ''} onChange={e => {
+              <label style={s.label}>이미지 {i + 1}</label>
+              <input style={s.input} value={gallery[i] ?? ''} onChange={e => {
                 const g = [...gallery]; g[i] = e.target.value; onChange('gallery', g);
               }} />
-              {gallery[i] && <img src={gallery[i]} alt="" style={s.preview(100)} onError={e => { e.target.style.display='none'; }} />}
+              {gallery[i] && <img src={gallery[i]} alt="" style={s.preview(100)} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
             </div>
           ))}
         </div>
@@ -217,12 +219,9 @@ function EditView({ project, onChange, onSave, savedMsg }) {
   );
 }
 
-/* ════════════════════════════
-   MAIN
-════════════════════════════ */
 export default function Admin() {
   useAdminCursor();
-  const [projects, setProjects] = useState(() => getProjects());
+  const [projects, setProjects] = useState<Project[]>(() => getProjectsFromCache());
   const [selectedId, setSelectedId] = useState(-1);
   const [savedMsg, setSavedMsg] = useState('');
 
@@ -232,7 +231,7 @@ export default function Admin() {
 
   const selected = selectedId !== -1 ? projects.find(p => p.id === selectedId) : undefined;
 
-  function updateField(field, value) {
+  function updateField(field: keyof Project, value: string | string[]) {
     setProjects(prev => prev.map(p => p.id === selectedId ? { ...p, [field]: value } : p));
   }
 
@@ -240,18 +239,19 @@ export default function Admin() {
     const clean = projects.filter(p => p.id !== null && p.id !== undefined && p.id > 0);
     saveProjects(clean).catch(console.error);
     setProjects(clean);
-    setSelectedId(-1);
+    setSavedMsg('저장됨');
+    setTimeout(() => setSavedMsg(''), 2000);
   }
 
   async function handleReset() {
-    if (!confirm('전체 데이터를 초기값으로 되돌릴까요?')) return;
+    if (!confirm('전체 데이터를 초기화하시겠습니까?')) return;
     setProjects(DEFAULT_PROJECTS);
     await saveProjects(DEFAULT_PROJECTS);
     setSelectedId(-1);
   }
 
-  async function handleDelete(id) {
-    if (!confirm('이 프로젝트를 삭제할까요?')) return;
+  async function handleDelete(id: number) {
+    if (!confirm('이 프로젝트를 삭제하시겠습니까?')) return;
     const updated = projects.filter(p => p.id !== id);
     setProjects(updated);
     await saveProjects(updated);
@@ -260,13 +260,12 @@ export default function Admin() {
   async function handleAdd() {
     const validIds = projects.map(p => p.id).filter(id => typeof id === 'number' && id > 0);
     const newId = validIds.length > 0 ? Math.max(...validIds) + 1 : 1;
-    const newProject = {
+    const newProject: Project = {
       id: newId,
       thumb: '',
       title: '새 프로젝트',
-      sub: '서브텍스트',
-      titleLine1: '새',
-      titleLine2: '프로젝트',
+      sub: '부제목',
+      link: '',
       screenImg: '',
       category: '',
       stack: '',
@@ -284,7 +283,6 @@ export default function Admin() {
 
   return (
     <div style={s.page}>
-      {/* 헤더 */}
       <header style={s.header}>
         <div style={s.headerLeft}>
           <span style={s.headerTitle}>Admin</span>
@@ -303,12 +301,11 @@ export default function Admin() {
           )}
         </div>
         <div style={s.headerLinks}>
-          <button onClick={() => setSelectedId(-1)} style={s.btn('transparent', '#888', '1px solid #333')}>← 홈</button>
+          <button onClick={() => setSelectedId(-1)} style={s.btn('transparent', '#888', '1px solid #333')}>목록</button>
           <Link to="/projects" style={s.btn('transparent', '#888', '1px solid #333')}>Projects</Link>
         </div>
       </header>
 
-      {/* 뷰 전환 */}
       {selected
         ? <EditView
             project={selected}

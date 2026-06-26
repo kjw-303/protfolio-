@@ -179,16 +179,6 @@ nav { display:flex; gap:3rem; align-items:center; }
 .cta-btn { display:inline-block; background:var(--accent); color:#fff; font-size:19px; font-weight:600; letter-spacing:0; padding:12px 28px; border:none; transition:background .2s,transform .15s; }
 .cta-btn:hover { background:#008db8; transform:translateY(-2px); }
 
-/* ═══ FOOTER ═══ */
-footer { background:var(--black); color:#fff; padding:clamp(3rem,5vw,5rem) var(--pad-x) 0; }
-.footer-grid { display:grid; grid-template-columns:1.5fr 1fr 1fr 1fr; gap:3rem; padding-bottom:3rem; border-bottom:1px solid #1a1a1a; }
-.footer-address { font-size:14px; color:#fff; line-height:1.9; margin-top:1rem; }
-.footer-col h4 { font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#bbb; margin-bottom:1.2rem; }
-.footer-col ul { list-style:none; }
-.footer-col li { margin-bottom:.55rem; }
-.footer-col a { font-size:14px; color:#ccc; transition:color .2s; }
-.footer-col a:hover { color:var(--accent); }
-
 /* ═══ SCROLL REVEAL ═══ */
 [data-reveal] { opacity:0; visibility:hidden; transform:translateY(28px); transition:opacity .75s ease, transform .75s cubic-bezier(.16,1,.3,1), visibility 0s .75s; }
 [data-reveal].in-view { opacity:1; visibility:visible; transform:translateY(0); transition:opacity .75s ease, transform .75s cubic-bezier(.16,1,.3,1), visibility 0s 0s; }
@@ -211,7 +201,6 @@ footer { background:var(--black); color:#fff; padding:clamp(3rem,5vw,5rem) var(-
   .section-title { font-size:44px; }
   .industries-label { font-size:44px; }
   .cta-heading { font-size:44px; }
-  .footer-grid { grid-template-columns:1fr 1fr; gap:2rem; }
 }
 
 @media(max-width:768px) {
@@ -223,7 +212,6 @@ footer { background:var(--black); color:#fff; padding:clamp(3rem,5vw,5rem) var(-
   .desktop-nav { display:none; }
   .nav-toggle { display:flex; }
   .nav-is-open .header { background:rgba(255,255,255,1) !important; transform:translateY(0) !important; }
-  /* HERO — hero-right 가 풀스크린 배경, title 중앙 오버레이 */
   .hero { display:block; position:relative; height:100svh; overflow:hidden; }
   .hero-left { display:none; }
   .hero-right { position:absolute; inset:0; width:100%; height:100%; overflow:hidden; }
@@ -248,7 +236,6 @@ footer { background:var(--black); color:#fff; padding:clamp(3rem,5vw,5rem) var(-
   .section-title { font-size:36px; }
   .projects-viewport { overflow:hidden; }
   .projects-track { gap:var(--pad-x); }
-  /* 좌우 여백(pad-x)만 제외하고 카드가 꽉 채움 */
   .proj-card { width:calc(100vw - var(--pad-x) * 2); }
   .proj-title { font-size:15px; }
   .proj-desc { font-size:13px; }
@@ -264,14 +251,10 @@ footer { background:var(--black); color:#fff; padding:clamp(3rem,5vw,5rem) var(-
   .cta-heading { font-size:36px; }
   .cta-sub { font-size:15px; margin-bottom:2rem; }
   .cta-btn { font-size:16px; padding:10px 22px; }
-  .footer-grid { grid-template-columns:1fr 1fr; gap:2rem; }
-  .footer-address { font-size:13px; }
-  .footer-col a { font-size:13px; }
 }
 
 @media(max-width:480px) {
   .hero-title { font-size:clamp(60px, 10vw, 44px); }
   .services { padding:40px var(--pad-x); }
   .service-tile { height:160px; }
-  .footer-grid { grid-template-columns:1fr; }
 }

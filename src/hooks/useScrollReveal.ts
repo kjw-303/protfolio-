@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
 
-export default function useScrollReveal() {
+export default function useScrollReveal(): void {
   useEffect(() => {
-    function splitWords(el) {
-      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
-      const nodes = [];
-      let n;
-      while ((n = walker.nextNode())) nodes.push(n);
+    function splitWords(el: Element) {
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      const nodes: Text[] = [];
+      let n: Node | null;
+      while ((n = walker.nextNode())) nodes.push(n as Text);
 
       nodes.forEach(tn => {
-        const parts = tn.textContent.split(/(\s+)/);
+        const parts = (tn.textContent ?? '').split(/(\s+)/);
         const frag = document.createDocumentFragment();
         parts.forEach(part => {
           if (/^\s+$/.test(part)) {
@@ -24,11 +24,11 @@ export default function useScrollReveal() {
             frag.appendChild(outer);
           }
         });
-        tn.parentNode.replaceChild(frag, tn);
+        tn.parentNode?.replaceChild(frag, tn);
       });
 
-      el.querySelectorAll('.word-inner').forEach((wi, i) => {
-        wi.style.transitionDelay = `${i * 0.055}s`;
+      (el as HTMLElement).querySelectorAll('.word-inner').forEach((wi, i) => {
+        (wi as HTMLElement).style.transitionDelay = `${i * 0.055}s`;
       });
     }
 

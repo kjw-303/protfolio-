@@ -1,13 +1,14 @@
+// @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProjects, fetchProjects } from '../../data/projects.js';
+import { getProjectsFromCache, fetchProjects } from '../../services/projectService';
 
 function toCards(list) {
   return list.slice(0, 6).map(p => ({ href: `/projects/${p.id}`, img: p.thumb, title: p.title, desc: p.sub }));
 }
 
 export default function About() {
-  const [cards, setCards] = useState(() => toCards(getProjects()));
+  const [cards, setCards] = useState(() => toCards(getProjectsFromCache()));
   const trackRef = useRef(null);
   const slideOffsetRef = useRef(0);
   const isResetRef = useRef(false);
@@ -132,16 +133,16 @@ export default function About() {
         </h2>
         <div className="about-body">
           <p className="about-desc" data-reveal data-delay="1">
-            웹과 앱 영역에서 기획부터 퍼블리싱까지 폭넓게 작업합니다. 교육·Healthcare·B2B 등 복잡한 요구사항이 있는 프로젝트에서 구조적 설계와 기술적 명확성을 바탕으로 결과물을 만듭니다.
+            다양한 분야에서 퀄리티 중심의 결과물을 제공합니다. 교육·Healthcare·B2B 등 다양한 산업에서 쌓아온 프로젝트 경험을 바탕으로 완성도 높은 결과물을 만들어냅니다.
           </p>
           <div className="about-links">
             <div className="about-link" data-reveal data-delay="2">
-              <p>컴포넌트 기반 설계와 체계화된 CSS로 장기적으로 유지보수가 쉬운 결과물을 제공합니다.</p>
+              <p>컴포넌트 기반의 체계적인 CSS 설계로 디자인이 살아있는 퍼블리싱 결과물을 제공합니다.</p>
               <span className="about-link-label" data-hover>Web Publishing</span>
             </div>
             <div className="about-link" data-reveal data-delay="3">
-              <p>지속적인 협업을 중요하게 생각합니다. 명확한 커뮤니케이션과 일관된 프로세스를 유지합니다.</p>
-              <span className="about-link-label" data-hover>협업 &amp; 유지보수</span>
+              <p>전략적인 비즈니스 목표에 맞춰 기획부터 디자인까지 일관된 방향으로 프로젝트를 진행합니다.</p>
+              <span className="about-link-label" data-hover>기획 &amp; 디자인</span>
             </div>
           </div>
         </div>
@@ -151,8 +152,8 @@ export default function About() {
         <div className="projects-header">
           <h2 className="section-title anim-words">Selected Works</h2>
           <div className="proj-arrows">
-            <button className="proj-arrow" id="projPrev" data-hover aria-label="이전">←</button>
-            <button className="proj-arrow" id="projNext" data-hover aria-label="다음">→</button>
+            <button className="proj-arrow" id="projPrev" data-hover aria-label="이전"></button>
+            <button className="proj-arrow" id="projNext" data-hover aria-label="다음"></button>
           </div>
         </div>
         <div className="projects-viewport">

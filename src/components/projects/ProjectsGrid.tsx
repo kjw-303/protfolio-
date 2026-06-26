@@ -1,13 +1,14 @@
+﻿// @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getProjects, fetchProjects } from '../../data/projects.js';
+import { getProjectsFromCache, fetchProjects } from '../../services/projectService';
 
 function toList(raw) {
   return raw.map(p => ({ id: p.id, img: p.thumb, title: p.title, sub: p.sub, link: p.link || '' }));
 }
 
 export default function ProjectsGrid() {
-  const [projects, setProjects] = useState(() => toList(getProjects()));
+  const [projects, setProjects] = useState(() => toList(getProjectsFromCache()));
   const gridRef = useRef(null);
 
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function ProjectsGrid() {
                   className="block-projects__image"
                   src={p.img}
                   alt={p.title}
-                  onError={e => { e.target.parentElement.innerHTML = `<div class="proj-ph">🏢</div>`; }}
+                  onError={e => { e.target.parentElement.innerHTML = `<div class="proj-ph">?룫</div>`; }}
                 />
               </div>
               <h4 className="block-projects__title">{p.title}</h4>

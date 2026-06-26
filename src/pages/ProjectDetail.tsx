@@ -1,10 +1,11 @@
+﻿// @ts-nocheck
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import Cursor from '../components/common/Cursor.jsx';
-import Header from '../components/common/Header.jsx';
-import SnapSlider from '../components/project-detail/SnapSlider.jsx';
-import useScrollReveal from '../hooks/useScrollReveal.js';
-import { getProjects, fetchProjects } from '../data/projects.js';
+import Cursor from '../components/common/Cursor';
+import Header from '../components/common/Header';
+import SnapSlider from '../components/project-detail/SnapSlider';
+import useScrollReveal from '../hooks/useScrollReveal';
+import { getProjectsFromCache, fetchProjects } from '../services/projectService';
 import '../styles/project-detail.css';
 
 function toSnapSliderProps(p) {
@@ -26,17 +27,18 @@ function toSnapSliderProps(p) {
 
 export default function ProjectDetail() {
   const { id } = useParams();
-  const [allProjects, setAllProjects] = useState(() => getProjects());
+  const [allProjects, setAllProjects] = useState(() => getProjectsFromCache());
 
   useEffect(() => {
     fetchProjects().then(setAllProjects);
   }, []);
 
   const raw = allProjects.find(p => p.id === Number(id)) || allProjects[0];
+  if (!raw) return null;
   const project = toSnapSliderProps(raw);
   const currentIdx = allProjects.findIndex(p => p.id === raw.id);
   const nextRaw = allProjects[(currentIdx + 1) % allProjects.length];
-  const nextProject = { id: nextRaw.id, title: nextRaw.title };
+  const nextProject = nextRaw ? { id: nextRaw.id, title: nextRaw.title } : null;
 
   useScrollReveal();
 
